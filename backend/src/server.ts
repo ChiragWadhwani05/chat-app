@@ -1,23 +1,17 @@
-import { config } from 'dotenv';
-config({ path: '.env' });
-import express from 'express';
-import connectDB from './db/connection';
-import userRoutes from './routes/user.routes';
+import { config } from "dotenv";
+config({ path: ".env" });
 
-const app = express();
+import connectDB from "./db/connection";
+import { app } from "./app";
+
 const port = process.env.PORT || 3000;
 
-app.use('/api/users', userRoutes);
-
-async function startServer() {
-  try {
-    await connectDB();
-    app.listen(port, () => {
-      console.log(`⚡️ Server is running at http://localhost:${port}`);
-    });
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-startServer();
+connectDB()
+	.then(() => {
+		app.listen(port, () => {
+			console.log(`⚡️ Server is running at http://localhost:${port}`);
+		});
+	})
+	.catch((error) => {
+		console.log("Failed to connectDB", error);
+	});
