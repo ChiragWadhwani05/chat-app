@@ -16,4 +16,6 @@ app.use(express.urlencoded({ limit: "20mb", extended: true }));
 
 app.use(cookieParser());
 
+app.use("/api/v1/user", userRoutes);
+
 export { app };
