@@ -26,10 +26,12 @@ const userSchema = new mongoose.Schema(
 		},
 		email: {
 			type: String,
-			unique: true,
 			lowercase: true,
 			trim: true,
 			index: true,
+		},
+		refreshToken: {
+			type: String,
 		},
 		bio: {
 			type: String,
