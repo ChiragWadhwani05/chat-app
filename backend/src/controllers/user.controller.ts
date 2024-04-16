@@ -12,6 +12,21 @@ const avatarImages = [
 	"https://res.cloudinary.com/chatapp1212/image/upload/v1713257422/jgqnppiuw5fujlpl934b.jpg",
 ];
 
+const isUsernameAvailable = asyncHandler(async (req: any, res: any) => {
+	const username = req.query.username;
+	if (!username || username?.trim() === "") {
+		throw new ApiError(400, "Username is required");
+	}
+
+	const user = await User.findOne({ username: username });
+	if (!user) {
+		return res.json(
+			new ApiResponse(200, true, "Username available", { username })
+		);
+	}
+	return res.json(new ApiResponse(409, false, "Username already in use", null));
+});
+
 const registerUser = asyncHandler(async (req: any, res: any) => {
 	const data = JSON.parse(req.body.data);
 
@@ -55,4 +70,4 @@ const registerUser = asyncHandler(async (req: any, res: any) => {
 		);
 });
 
-export { registerUser };
+export { registerUser, isUsernameAvailable };
