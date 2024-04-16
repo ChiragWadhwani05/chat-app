@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
+import sharp from "sharp";
 import fs from "fs";
 import { ApiError } from "./apiError";
 
@@ -14,11 +15,20 @@ const uploadToCloudinary = async (filePath: string) => {
 		if (!filePath) {
 			throw new ApiError(400, "File path is missing or invalid");
 		}
-		const response = await cloudinary.uploader.upload(filePath, {
+
+		const compressedImagePath = `${filePath}-compressed.jpg`; // Adjust file extension if needed
+		await sharp(filePath)
+			.resize({ width: 800 })
+			.jpeg({ quality: 80 })
+			.toFile(compressedImagePath);
+
+		// Upload the compressed image file to Cloudinary
+		const response = await cloudinary.uploader.upload(compressedImagePath, {
 			resource_type: "auto",
 		});
-		console.log("File uploaded successfully", response);
+
 		fs.unlinkSync(filePath); // Delete the file from the server
+		fs.unlinkSync(compressedImagePath); // Delete the file from the server
 
 		return response;
 	} catch (error: any) {
@@ -29,3 +39,5 @@ const uploadToCloudinary = async (filePath: string) => {
 		);
 	}
 };
+
+export { uploadToCloudinary };
