@@ -1,5 +1,7 @@
 import express from "express";
 import {
+	getUserById,
+	getUserByUsername,
 	isUsernameAvailable,
 	loginUser,
 	logoutUser,
@@ -24,8 +26,8 @@ router.route("/register").post(
 
 router.route("/login").post(loginUser);
 
-// router.route("/getById").get(getUserById);
-// router.route("/getByUsername").get(getUserByUsername);
+router.route("/getById").get(getUserById);
+router.route("/getByUsername").get(getUserByUsername);
 
 // secured routes
 
