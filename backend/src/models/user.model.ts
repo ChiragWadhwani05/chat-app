@@ -55,7 +55,7 @@ userSchema.pre("save", async function (next) {
 // Generate access token
 userSchema.methods.generateAccessToken = function () {
 	return jwt.sign(
-		{ userId: this._id, username: this.username },
+		{ _id: this._id, username: this.username },
 		process.env.ACCESS_TOKEN_SECRET || "chatApp",
 		{
 			expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
@@ -66,7 +66,7 @@ userSchema.methods.generateAccessToken = function () {
 // Generate refresh token
 userSchema.methods.generateRefreshToken = function () {
 	return jwt.sign(
-		{ userId: this._id },
+		{ _id: this._id },
 		process.env.REFRESH_TOKEN_SECRET || "chatApp",
 		{
 			expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
@@ -80,5 +80,13 @@ userSchema.methods.isPasswordCorrect = async function (
 ) {
 	return await bcryptjs.compare(candidatePassword, this.password);
 };
+
+declare module "mongoose" {
+	interface Document {
+		generateAccessToken(): string;
+		generateRefreshToken(): string;
+		isPasswordCorrect(candidatePassword: string): Promise<boolean>;
+	}
+}
 
 export const User = mongoose.model("User", userSchema);
