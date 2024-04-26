@@ -1,10 +1,10 @@
-import express from "express";
 import asyncHandler from "../utils/asyncHandler";
 import { ApiResponse } from "../utils/apiResponse";
 import { ApiError } from "../utils/apiError";
 import { User } from "../models/user.model";
 import { uploadToCloudinary } from "../utils/cloudinary";
 import mongoose from "mongoose";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 const avatarImages = [
 	"https://res.cloudinary.com/chatapp1212/image/upload/v1713257423/ngqg1nqg9vrtwz5ndc8q.jpg",
@@ -190,6 +190,49 @@ const getUserByUsername = asyncHandler(async (req: any, res: any) => {
 		.json(new ApiResponse(200, true, "User get successfully", user));
 });
 
+const generateNewAccessToken = asyncHandler(async (req: any, res: any) => {
+	const refreshToken =
+		req.cookies.refreshToken ||
+		req.body.refreshToken ||
+		req.headers["x-refresh-token"];
+
+	if (!refreshToken) {
+		throw new ApiError(401, "Unauthorized");
+	}
+
+	try {
+		const decodedToken = jwt.verify(
+			refreshToken,
+			process.env.REFRESH_TOKEN_SECRET || "chatApp"
+		) as JwtPayload;
+
+		const user = await User.findById(decodedToken?._id);
+
+		if (!user) {
+			throw new ApiError(401, "Invalid Refresh Token");
+		}
+
+		if (user.refreshToken !== refreshToken) {
+			throw new ApiError(401, "Refresh Token is expired");
+		}
+
+		const { accessToken, refreshToken: newRefreshToken } = await generateTokens(
+			user._id
+		);
+
+		res
+			.status(200)
+			.cokkie("accessToken", accessToken)
+			.json(
+				new ApiResponse(200, true, "Access Token generated successfully", {
+					accessToken,
+				})
+			);
+	} catch (error: any) {
+		throw new ApiError(401, error.message);
+	}
+});
+
 export {
 	registerUser,
 	isUsernameAvailable,
@@ -197,4 +240,5 @@ export {
 	logoutUser,
 	getUserById,
 	getUserByUsername,
+	generateNewAccessToken,
 };
