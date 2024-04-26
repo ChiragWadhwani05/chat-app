@@ -222,7 +222,7 @@ const generateNewAccessToken = asyncHandler(async (req: any, res: any) => {
 
 		res
 			.status(200)
-			.cokkie("accessToken", accessToken)
+			.cookie("accessToken", accessToken)
 			.json(
 				new ApiResponse(200, true, "Access Token generated successfully", {
 					accessToken,

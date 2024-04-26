@@ -1,5 +1,6 @@
 import express from "express";
 import {
+	generateNewAccessToken,
 	getUserById,
 	getUserByUsername,
 	isUsernameAvailable,
@@ -32,5 +33,6 @@ router.route("/getByUsername").get(getUserByUsername);
 // secured routes
 
 router.route("/logout").post(verifyJWT, logoutUser);
+router.route("/refresh-token").get(generateNewAccessToken);
 
 export default router;
