@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import userRoutes from "./routes/user.routes";
+import chatRoutes from "./routes/chat.routes";
 
 const app = express();
 
@@ -17,5 +18,6 @@ app.use(express.urlencoded({ limit: "20mb", extended: true }));
 app.use(cookieParser());
 
 app.use("/api/v1/user", userRoutes);
+app.use("api/v1/chat", chatRoutes);
 
 export { app };
