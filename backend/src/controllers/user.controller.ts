@@ -152,6 +152,65 @@ const logoutUser = asyncHandler(async (req: any, res: any) => {
 		.json(new ApiResponse(200, true, "User logged out successfully", null));
 });
 
+const regenerateTokens = asyncHandler(async (req: any, res: any) => {
+	const refreshToken =
+		req.cookies.refreshToken ||
+		req.body.refreshToken ||
+		req.headers["x-refresh-token"];
+
+	if (!refreshToken) {
+		throw new ApiError(401, "Unauthorized");
+	}
+
+	try {
+		const decodedToken = jwt.verify(
+			refreshToken,
+			process.env.REFRESH_TOKEN_SECRET || "chatApp"
+		) as JwtPayload;
+
+		const user = await User.findById(decodedToken?._id);
+
+		if (!user) {
+			throw new ApiError(401, "Invalid Refresh Token");
+		}
+
+		if (user.refreshToken !== refreshToken) {
+			throw new ApiError(401, "Refresh Token is expired");
+		}
+
+		const { accessToken, refreshToken: newRefreshToken } = await generateTokens(
+			user._id
+		);
+
+		res
+			.status(200)
+			.cookie("accessToken", accessToken)
+			.cookie("refreshToken", newRefreshToken)
+			.json(
+				new ApiResponse(200, true, "Access Token generated successfully", {
+					accessToken,
+				})
+			);
+	} catch (error: any) {
+		throw new ApiError(401, error.message);
+	}
+});
+
+const searchUsers = asyncHandler(async (req: any, res: any) => {
+	const query = req.query.query;
+	if (!query) {
+		throw new ApiError(400, "Username is required");
+	}
+	const users = await User.find({
+		$or: [
+			{ username: { $regex: query, $options: "i" } }, // Case-insensitive regex match for username
+			{ fullname: { $regex: query, $options: "i" } }, // Case-insensitive regex match for full name
+		],
+	}).select("-password -refreshToken");
+
+	return res.status(200).json(new ApiResponse(200, true, "Users found", users));
+});
+
 const getUserById = asyncHandler(async (req: any, res: any) => {
 	const userId = req.query.userId;
 	if (!userId) {
@@ -189,50 +248,6 @@ const getUserByUsername = asyncHandler(async (req: any, res: any) => {
 		.status(200)
 		.json(new ApiResponse(200, true, "User get successfully", user));
 });
-
-const generateNewAccessToken = asyncHandler(async (req: any, res: any) => {
-	const refreshToken =
-		req.cookies.refreshToken ||
-		req.body.refreshToken ||
-		req.headers["x-refresh-token"];
-
-	if (!refreshToken) {
-		throw new ApiError(401, "Unauthorized");
-	}
-
-	try {
-		const decodedToken = jwt.verify(
-			refreshToken,
-			process.env.REFRESH_TOKEN_SECRET || "chatApp"
-		) as JwtPayload;
-
-		const user = await User.findById(decodedToken?._id);
-
-		if (!user) {
-			throw new ApiError(401, "Invalid Refresh Token");
-		}
-
-		if (user.refreshToken !== refreshToken) {
-			throw new ApiError(401, "Refresh Token is expired");
-		}
-
-		const { accessToken, refreshToken: newRefreshToken } = await generateTokens(
-			user._id
-		);
-
-		res
-			.status(200)
-			.cookie("accessToken", accessToken)
-			.json(
-				new ApiResponse(200, true, "Access Token generated successfully", {
-					accessToken,
-				})
-			);
-	} catch (error: any) {
-		throw new ApiError(401, error.message);
-	}
-});
-
 export {
 	registerUser,
 	isUsernameAvailable,
@@ -240,5 +255,6 @@ export {
 	logoutUser,
 	getUserById,
 	getUserByUsername,
-	generateNewAccessToken,
+	regenerateTokens,
+	searchUsers,
 };

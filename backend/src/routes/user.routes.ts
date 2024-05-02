@@ -1,12 +1,13 @@
 import express from "express";
 import {
-	generateNewAccessToken,
+	regenerateTokens,
 	getUserById,
 	getUserByUsername,
 	isUsernameAvailable,
 	loginUser,
 	logoutUser,
 	registerUser,
+	searchUsers,
 } from "../controllers/user.controller";
 import { upload } from "../middlewares/multer.middleware";
 import { verifyJWT } from "../middlewares/auth.middleware";
@@ -27,12 +28,13 @@ router.route("/register").post(
 
 router.route("/login").post(loginUser);
 
+// secured routes
+router.use(verifyJWT);
+
 router.route("/getById").get(getUserById);
 router.route("/getByUsername").get(getUserByUsername);
-
-// secured routes
-
-router.route("/logout").post(verifyJWT, logoutUser);
-router.route("/refresh-token").get(generateNewAccessToken);
+router.route("/logout").post(logoutUser);
+router.route("/refresh-token").get(regenerateTokens);
+router.route("/search-user").get(searchUsers);
 
 export default router;
