@@ -75,9 +75,20 @@ const createGroupChat = asyncHandler(async (req: any, res: any) => {
 	return res.status(200).json(new ApiResponse(200, true, "Group created", chat));
 });
 
-// const getChats = asyncHandler(async (req: any, res: any) => {
-// 	const userId = req.user._id;
+const getAllChats = asyncHandler(async (req: any, res: any) => {
+	const userId = req.user._id;
+	const chats = await Chat.find({
+		participants: { $in: [userId] },
+	})
+		.populate(
+			"participants",
+			"-password -refreshToken -email -createdAt -updatedAt"
+		)
+		.sort({ updatedAt: -1 });
 
-// })
+	return res
+		.status(200)
+		.json(new ApiResponse(200, true, "Chats found successfully", chats));
+});
 
-export { createChat, createGroupChat };
+export { createChat, createGroupChat, getAllChats };

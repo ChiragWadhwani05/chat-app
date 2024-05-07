@@ -1,5 +1,9 @@
 import express from "express";
-import { createChat, createGroupChat } from "../controllers/chat.controller";
+import {
+	createChat,
+	createGroupChat,
+	getAllChats,
+} from "../controllers/chat.controller";
 
 import { verifyJWT } from "../middlewares/auth.middleware";
 import { upload } from "../middlewares/multer.middleware";
@@ -18,5 +22,6 @@ router.route("/create-group").post(
 	]),
 	createGroupChat
 );
+router.route("/get-all-chats").get(getAllChats);
 
 export default router;

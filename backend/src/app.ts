@@ -18,6 +18,6 @@ app.use(express.urlencoded({ limit: "20mb", extended: true }));
 app.use(cookieParser());
 
 app.use("/api/v1/user", userRoutes);
-app.use("api/v1/chat", chatRoutes);
+app.use("/api/v1/chat", chatRoutes);
 
 export { app };
