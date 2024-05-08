@@ -51,7 +51,7 @@ const createGroupChat = asyncHandler(async (req: any, res: any) => {
 
 	const avatarCloudinaryPath = req.files?.avatar
 		? (await uploadToCloudinary(req.files.avatar[0].path)).secure_url
-		: "https://res.cloudinary.com/chatapp1212/image/upload/v1713257423/ngqg1nqg9vrtwz5ndc8q.jpg";
+		: null;
 
 	if (!name) {
 		throw new ApiError(400, "Group name is required");
@@ -86,9 +86,43 @@ const getAllChats = asyncHandler(async (req: any, res: any) => {
 		)
 		.sort({ updatedAt: -1 });
 
+	const otherParticipant = (participants: any) => {
+		participants = participants.filter(
+			(participant: any) => participant._id != userId
+		);
+
+		if (participants[0].fullname) {
+			return participants[0].fullname;
+		}
+		return participants[0];
+	};
+	const finalChats = chats.map((chat) => {
+		const otherParticipants = (participants: any) => {
+			participants = participants.filter(
+				(participant: any) => participant._id != userId
+			);
+			return participants;
+		};
+
+		return {
+			_id: chat._id,
+			isGroupChat: chat.isGroupChat,
+			name: chat.isGroupChat
+				? chat.name
+				: otherParticipants(chat.participants)[0].fullname,
+			avatar: chat.isGroupChat
+				? chat.avatar
+					? chat.avatar
+					: chat.participants
+							.slice(0, 3)
+							.map((participant: any) => participant.avatar)
+				: otherParticipants(chat.participants)[0].avatar,
+		};
+	});
+
 	return res
 		.status(200)
-		.json(new ApiResponse(200, true, "Chats found successfully", chats));
+		.json(new ApiResponse(200, true, "Chats found successfully", finalChats));
 });
 
 export { createChat, createGroupChat, getAllChats };
