@@ -1,8 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import SignIn from './components/SignIn';
 import { createTheme, ThemeProvider } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 import { blue } from '@mui/material/colors';
+import { Toaster } from 'react-hot-toast';
+import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
 
 const lightTheme = createTheme({
@@ -99,6 +100,7 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
         </Routes>
       </BrowserRouter>
+      <Toaster position="top-center" reverseOrder={false} />
     </ThemeProvider>
   );
 }

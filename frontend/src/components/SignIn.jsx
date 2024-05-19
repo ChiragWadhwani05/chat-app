@@ -11,17 +11,29 @@ import { Link } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { FcGoogle } from 'react-icons/fc';
-
+import { useDispatch } from 'react-redux';
+import { loginUser } from '../redux-slices/auth';
 // TODO remove, this demo shouldn't need to reset the theme.
 
 function SignIn() {
+  const dispatch = useDispatch();
+
+  const [data, setData] = useState({
+    username: '',
+    password: '',
+  });
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setData({
+      ...data,
+      [name]: value,
+    });
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    dispatch(loginUser(data));
   };
 
   const [showPassword, setShowPassword] = useState(false);
@@ -52,10 +64,11 @@ function SignIn() {
             margin="normal"
             required
             fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
+            id="username"
+            label="Username"
+            name="username"
+            autoComplete="username"
+            onChange={handleChange}
             autoFocus
           />
           <TextField
@@ -67,6 +80,7 @@ function SignIn() {
             type={showPassword ? 'text' : 'password'}
             id="password"
             autoComplete="current-password"
+            onChange={handleChange}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">

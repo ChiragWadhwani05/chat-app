@@ -11,15 +11,30 @@ import { Link } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { FcGoogle } from 'react-icons/fc';
+import { useDispatch, useSelector } from 'react-redux';
+import { registerUser } from '../redux-slices/auth';
+// import toast from 'react-hot-toast';
 
 export default function SignUp() {
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth);
+  const [data, setData] = useState({
+    fullname: '',
+    username: '',
+    email: '',
+    password: '',
+  });
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setData({
+      ...data,
+      [name]: value,
+    });
+  };
   const handleSubmit = (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    dispatch(registerUser(data));
+    console.log(user);
   };
 
   const [showPassword, setShowPassword] = useState(false);
@@ -50,11 +65,12 @@ export default function SignUp() {
           <TextField
             margin="normal"
             fullWidth
-            id="name"
+            id="fullname"
             label="Full Name"
-            name="name"
+            name="fullname"
             autoComplete="name"
             autoFocus
+            onChange={handleChange}
           />
           <TextField
             margin="normal"
@@ -64,6 +80,7 @@ export default function SignUp() {
             label="Username"
             name="username"
             autoComplete="username"
+            onChange={handleChange}
           />
           <TextField
             margin="normal"
@@ -73,6 +90,7 @@ export default function SignUp() {
             label="Email Address"
             name="email"
             autoComplete="email"
+            onChange={handleChange}
           />
           <TextField
             margin="normal"
@@ -83,6 +101,7 @@ export default function SignUp() {
             type={showPassword ? 'text' : 'password'}
             id="password"
             autoComplete="current-password"
+            onChange={handleChange}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">

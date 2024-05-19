@@ -1,13 +1,26 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/v1/users';
+const API_URL = 'https://chat-app-production-4500.up.railway.app/api/v1/user';
+axios.defaults.withCredentials = true;
 
 export const registerUser = createAsyncThunk('registerUser', async (data) => {
-  const response = await axios.post(`${API_URL}/register`, data, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+  let response = await axios.post(`${API_URL}/register`, data, {
+    headers: { 'Content-Type': 'application/json' },
   });
-  return response.json;
+  if (response.data.success === true) {
+    response = await axios.post(`${API_URL}/login`, data, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  return response.data;
+});
+
+export const loginUser = createAsyncThunk('loginUser', async (data) => {
+  const response = await axios.post(`${API_URL}/login`, data, {
+    headers: { 'Content-Type': 'application/json' },
+  });
+  return response.data;
 });
 
 export const authSlice = createSlice({
@@ -26,6 +39,18 @@ export const authSlice = createSlice({
         state.user = action.payload;
       })
       .addCase(registerUser.rejected, (state) => {
+        state.user = null;
+      });
+
+    builder
+      .addCase(loginUser.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload;
+      })
+      .addCase(loginUser.rejected, (state) => {
         state.user = null;
       });
   },
