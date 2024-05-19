@@ -8,6 +8,7 @@ import {
 	logoutUser,
 	registerUser,
 	searchUsers,
+	getUser,
 } from "../controllers/user.controller";
 // import { upload } from "../middlewares/multer.middleware";
 import { verifyJWT } from "../middlewares/auth.middleware";
@@ -23,6 +24,7 @@ router.route("/login").post(loginUser);
 // secured routes
 router.use(verifyJWT);
 
+router.route("/").get(getUser);
 router.route("/getById").get(getUserById);
 router.route("/getByUsername").get(getUserByUsername);
 router.route("/logout").post(logoutUser);

@@ -113,7 +113,7 @@ const loginUser = asyncHandler(async (req: any, res: any) => {
 		httpOnly: true,
 		secure: true,
 		maxAge: 1000 * 60 * 60 * 24 * 7, // 7 Days
-		sameSite: 'none'
+		sameSite: "none",
 	};
 
 	// TODO: Add options when in production
@@ -152,6 +152,15 @@ const logoutUser = asyncHandler(async (req: any, res: any) => {
 		.clearCookie("accessToken", options)
 		.clearCookie("refreshToken", options)
 		.json(new ApiResponse(200, true, "User logged out successfully", null));
+});
+
+const getUser = asyncHandler(async (req: any, res: any) => {
+	const userId = req.user._id;
+	const user = await User.findById(userId).select("-password -refreshToken");
+	if (!user) {
+		throw new ApiError(404, "User not found");
+	}
+	return res.status(200).json(new ApiResponse(200, true, "User found", user));
 });
 
 const regenerateTokens = asyncHandler(async (req: any, res: any) => {
@@ -255,6 +264,7 @@ export {
 	isUsernameAvailable,
 	loginUser,
 	logoutUser,
+	getUser,
 	getUserById,
 	getUserByUsername,
 	regenerateTokens,
