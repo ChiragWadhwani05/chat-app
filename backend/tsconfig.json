@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ES5",
+    "module": "CommonJS",
+    "strict": true,
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
+}
