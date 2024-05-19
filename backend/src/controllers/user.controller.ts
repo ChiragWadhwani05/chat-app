@@ -2,7 +2,7 @@ import asyncHandler from "../utils/asyncHandler";
 import { ApiResponse } from "../utils/apiResponse";
 import { ApiError } from "../utils/apiError";
 import { User } from "../models/user.model";
-import { uploadToCloudinary } from "../utils/cloudinary";
+// import { uploadToCloudinary } from "../utils/cloudinary";
 import mongoose from "mongoose";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
@@ -47,7 +47,7 @@ const isUsernameAvailable = asyncHandler(async (req: any, res: any) => {
 });
 
 const registerUser = asyncHandler(async (req: any, res: any) => {
-	const data = JSON.parse(req.body.data);
+	const data = req.body;
 
 	// Check if necessary data is provided
 	if ([data.username, data.password].some((field) => field.trim() === "")) {
@@ -61,9 +61,9 @@ const registerUser = asyncHandler(async (req: any, res: any) => {
 	// choose a random num between 0 to avatarImages.length()
 	const imageNum = Math.floor(Math.random() * avatarImages.length);
 	// Upload image to cloudinary
-	const avatarCloudinaryPath = req.files?.avatar
-		? (await uploadToCloudinary(req.files.avatar[0].path)).secure_url
-		: avatarImages[imageNum];
+	// const avatarCloudinaryPath = req.files?.avatar
+	// 	? (await uploadToCloudinary(req.files.avatar[0].path)).secure_url
+	// 	: avatarImages[imageNum];
 
 	// Create new user
 	const user = await User.create({
@@ -71,7 +71,7 @@ const registerUser = asyncHandler(async (req: any, res: any) => {
 		password: data.password,
 		fullname: data.fullname || "",
 		email: data.email || "",
-		avatar: avatarCloudinaryPath,
+		avatar: avatarImages[imageNum],
 	});
 
 	const createdUser = await User.findById(user._id).select(
@@ -117,8 +117,8 @@ const loginUser = asyncHandler(async (req: any, res: any) => {
 	// TODO: Add options when in production
 	return res
 		.status(200)
-		.cookie("accessToken", accessToken)
-		.cookie("refreshToken", refreshToken)
+		.cookie("accessToken", accessToken, options)
+		.cookie("refreshToken", refreshToken, options)
 		.json(
 			new ApiResponse(200, true, "User logged in successfully", {
 				user: loggedInUser,
@@ -147,8 +147,8 @@ const logoutUser = asyncHandler(async (req: any, res: any) => {
 
 	return res
 		.status(200)
-		.clearCookie("accessToken")
-		.clearCookie("refreshToken")
+		.clearCookie("accessToken", options)
+		.clearCookie("refreshToken", options)
 		.json(new ApiResponse(200, true, "User logged out successfully", null));
 });
 
