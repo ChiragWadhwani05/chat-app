@@ -3,8 +3,14 @@ import { createTheme, ThemeProvider } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 import { blue } from '@mui/material/colors';
 import { Toaster } from 'react-hot-toast';
+import { useDispatch, useSelector } from 'react-redux';
+import { getSelf } from './redux-slices/auth';
+import ProtectRoute from './components/Protectroute';
+import { useEffect } from 'react';
 import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
+import Home from './pages/Home';
+import Loader from './components/Loader';
 
 const lightTheme = createTheme({
   palette: {
@@ -91,13 +97,43 @@ const lightTheme = createTheme({
 // });
 
 function App() {
-  return (
+  const dispatch = useDispatch();
+  const { user, isLoading } = useSelector((state) => state.auth);
+  useEffect(() => {
+    dispatch(getSelf());
+  }, [dispatch]);
+
+  return isLoading ? (
+    <Loader />
+  ) : (
     <ThemeProvider theme={lightTheme}>
       <CssBaseline />
       <BrowserRouter>
         <Routes>
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
+          <Route
+            path="/"
+            element={
+              <ProtectRoute user={user}>
+                <Home />
+              </ProtectRoute>
+            }
+          />
+          <Route
+            path="/signin"
+            element={
+              <ProtectRoute user={!user} redirect="/">
+                <SignIn />
+              </ProtectRoute>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <ProtectRoute user={!user} redirect="/">
+                <SignUp />
+              </ProtectRoute>
+            }
+          />
         </Routes>
       </BrowserRouter>
       <Toaster position="top-center" reverseOrder={false} />
