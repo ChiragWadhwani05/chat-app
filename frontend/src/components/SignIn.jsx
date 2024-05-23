@@ -6,14 +6,13 @@ import { TextField, InputAdornment, IconButton, Divider } from '@mui/material';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
+import { Link } from 'react-router-dom';
 import Container from '@mui/material/Container';
-import { Link } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { FcGoogle } from 'react-icons/fc';
 import { useDispatch } from 'react-redux';
 import { loginUser } from '../redux-slices/auth';
-// TODO remove, this demo shouldn't need to reset the theme.
 
 function SignIn() {
   const dispatch = useDispatch();
@@ -119,7 +118,7 @@ function SignIn() {
         </Box>
         <Typography component="h1" variant="body1">
           {"Don't have an account? "}
-          <Link href="/signup" variant="body1">
+          <Link to="/signup" variant="body1">
             {'Sign Up'}
           </Link>
         </Typography>

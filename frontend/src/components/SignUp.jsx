@@ -7,13 +7,12 @@ import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import { Link } from '@mui/material';
+import { Link } from 'react-router-dom';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { FcGoogle } from 'react-icons/fc';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser } from '../redux-slices/auth';
-// import toast from 'react-hot-toast';
 
 export default function SignUp() {
   const dispatch = useDispatch();
@@ -140,7 +139,7 @@ export default function SignUp() {
         </Box>
         <Typography component="h1" variant="body1">
           {'Already have an account? '}
-          <Link href="/signin" variant="body1">
+          <Link to="/signin" variant="body1">
             {'Sign In'}
           </Link>
         </Typography>

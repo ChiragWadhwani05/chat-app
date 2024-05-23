@@ -1,16 +1,21 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 
-const ProtectRoute = ({ children, user, redirect = '/signin' }) => {
-  if (!user) return <Navigate to={redirect} />;
+const ProtectRoute = ({ children, isPublic = false, redirectTo }) => {
+  const { user } = useSelector((state) => state.auth);
 
-  return children ? children : <Outlet />;
+  if (isPublic) {
+    return user ? <Navigate to={redirectTo} /> : children;
+  }
+
+  return user ? children : <Navigate to={redirectTo} />;
 };
 
 ProtectRoute.propTypes = {
   children: PropTypes.node.isRequired,
-  user: PropTypes.bool,
-  redirect: PropTypes.string,
+  isPublic: PropTypes.bool,
+  redirectTo: PropTypes.string.isRequired,
 };
 
 export default ProtectRoute;

@@ -7,8 +7,10 @@ axios.defaults.withCredentials = true;
 const initialState = {
   user: null,
   isLoading: false,
+  isAuthenticated: false,
   error: null,
 };
+
 export const registerUser = createAsyncThunk('registerUser', async (data) => {
   let response = await axios.post(`${API_URL}/register`, data, {
     headers: { 'Content-Type': 'application/json' },
@@ -22,18 +24,31 @@ export const registerUser = createAsyncThunk('registerUser', async (data) => {
   return response.data;
 });
 
-export const loginUser = createAsyncThunk('loginUser', async (data) => {
-  const response = await axios.post(`${API_URL}/login`, data, {
-    headers: { 'Content-Type': 'application/json' },
-  });
-  return response.data;
-});
+export const loginUser = createAsyncThunk(
+  'loginUser',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/login`, data);
+      console.log(response.data);
+      return response.data.data.user;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
 
 export const getSelf = createAsyncThunk('getSelf', async () => {
   const response = await axios.get(`${API_URL}`, {
     headers: { 'Content-Type': 'application/json' },
   });
   console.log(response.data);
+  return response.data.data;
+});
+
+export const logoutUser = createAsyncThunk('logoutUser', async () => {
+  const response = await axios.get(`${API_URL}/logout`, {
+    headers: { 'Content-Type': 'application/json' },
+  });
   return response.data;
 });
 
@@ -41,14 +56,14 @@ export const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    // userExists: (state, action) => {
-    //   state.user = action.payload;
-    //   state.loader = false;
-    // },
-    // userNotExists: (state) => {
-    //   state.user = null;
-    //   state.loader = false;
-    // },
+    userExists: (state, action) => {
+      state.user = action.payload;
+      state.isLoading = false;
+    },
+    userNotExists: (state) => {
+      state.user = null;
+      state.isLoading = false;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -58,6 +73,7 @@ export const authSlice = createSlice({
       .addCase(registerUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload;
+        state.isAuthenticated = true;
       })
       .addCase(registerUser.rejected, (state) => {
         state.isLoading = false;
@@ -71,6 +87,7 @@ export const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload;
+        state.isAuthenticated = true;
       })
       .addCase(loginUser.rejected, (state) => {
         state.user = null;
@@ -82,8 +99,21 @@ export const authSlice = createSlice({
       .addCase(getSelf.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload;
+        state.isAuthenticated = true;
       })
       .addCase(getSelf.rejected, (state) => {
+        state.isLoading = false;
+        state.user = null;
+      });
+    builder
+      .addCase(logoutUser.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.isLoading = false;
+        state.user = null;
+      })
+      .addCase(logoutUser.rejected, (state) => {
         state.isLoading = false;
         state.user = null;
       });
