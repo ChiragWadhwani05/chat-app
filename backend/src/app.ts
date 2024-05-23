@@ -15,7 +15,20 @@ app.use(
 );
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ limit: "20mb", extended: true }));
+app.use(
+    createExpressErrorHandler((err, req, res, next) => {
+      if (err) {
+        const { name, message } = err;
 
+        res
+          .status(400)
+          .json(
+            new ApiError(400, { name, message }, false, 'Invalid JSON syntax')
+          );
+        return;
+      }
+    })
+  );
 app.use(cookieParser());
 
 app.use("/api/v1/user", userRoutes);
