@@ -7,6 +7,7 @@ import { getSelf } from './redux-slices/auth';
 import ProtectRoute from './components/Protectroute';
 import { useEffect } from 'react';
 import { lightTheme } from './constants/themes';
+import NotFoundPage from './components/NotFound';
 import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
 import Loader from './components/Loader';
@@ -49,6 +50,7 @@ function App() {
               </ProtectRoute>
             }
           />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
       <Toaster position="top-center" reverseOrder={false} />
