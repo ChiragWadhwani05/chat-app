@@ -11,12 +11,12 @@ import Container from '@mui/material/Container';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { FcGoogle } from 'react-icons/fc';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../redux-slices/auth';
 
 function SignIn() {
   const dispatch = useDispatch();
-
+  const { error } = useSelector((state) => state.auth);
   const [data, setData] = useState({
     username: '',
     password: '',
@@ -90,10 +90,20 @@ function SignIn() {
               ),
             }}
           />
+          <Typography
+            component="h1"
+            variant="body1"
+            sx={{ color: 'red', textAlign: 'center' }}
+          >
+            {error ? error.message : ''}
+          </Typography>
           <Button
             type="submit"
             fullWidth
             variant="contained"
+            disabled={
+              !data.username || !data.password || data.password.length < 5
+            }
             sx={{ mt: 3, mb: 4 }}
           >
             Sign In

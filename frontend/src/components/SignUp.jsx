@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -10,9 +10,12 @@ import Container from '@mui/material/Container';
 import { Link } from 'react-router-dom';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
+import HighlightOffOutlinedIcon from '@mui/icons-material/HighlightOffOutlined';
 import { FcGoogle } from 'react-icons/fc';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser } from '../redux-slices/auth';
+import axios from 'axios';
 
 export default function SignUp() {
   const dispatch = useDispatch();
@@ -23,6 +26,9 @@ export default function SignUp() {
     email: '',
     password: '',
   });
+  const [usernameAvailable, setUsernameAvailable] = useState(null);
+  const timeoutRef = useRef(null);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setData({
@@ -30,6 +36,39 @@ export default function SignUp() {
       [name]: value,
     });
   };
+
+  const checkUsernameAvailability = async (username) => {
+    if (username.length < 6 || username.length > 20) {
+      return false;
+    }
+    // Replace with your actual API call
+    const response = await axios.get(
+      `https://chat-app-production-4500.up.railway.app/api/v1/user/is-username-available?username=${username}`
+    );
+
+    return response.data.success;
+  };
+
+  useEffect(() => {
+    if (data.username === '') {
+      setUsernameAvailable(null);
+    }
+    if (data.username) {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(async () => {
+        const available = await checkUsernameAvailability(data.username);
+        setUsernameAvailable(available);
+      }, 2000); // debounce delay
+    }
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [data.username]);
+
   const handleSubmit = (event) => {
     event.preventDefault();
     dispatch(registerUser(data));
@@ -80,6 +119,19 @@ export default function SignUp() {
             name="username"
             autoComplete="username"
             onChange={handleChange}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  {usernameAvailable === null ? (
+                    ''
+                  ) : usernameAvailable ? (
+                    <CheckCircleOutlineOutlinedIcon color="success" />
+                  ) : (
+                    <HighlightOffOutlinedIcon color="error" />
+                  )}
+                </InputAdornment>
+              ),
+            }}
           />
           <TextField
             margin="normal"
@@ -116,8 +168,14 @@ export default function SignUp() {
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 4 }}
+            disabled={
+              data.username === '' ||
+              usernameAvailable === false ||
+              data.password === '' ||
+              data.email === ''
+            }
           >
-            Sign In
+            Sign Up
           </Button>
 
           <Divider>OR</Divider>

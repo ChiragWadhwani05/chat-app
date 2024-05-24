@@ -9,6 +9,7 @@ const initialState = {
   isLoading: false,
   isAuthenticated: false,
   error: null,
+  success: false,
 };
 
 export const registerUser = createAsyncThunk('registerUser', async (data) => {
@@ -79,7 +80,6 @@ export const authSlice = createSlice({
         state.isLoading = false;
         state.user = null;
       });
-
     builder
       .addCase(loginUser.pending, (state) => {
         state.isLoading = true;
@@ -89,8 +89,10 @@ export const authSlice = createSlice({
         state.user = action.payload;
         state.isAuthenticated = true;
       })
-      .addCase(loginUser.rejected, (state) => {
+      .addCase(loginUser.rejected, (state, action) => {
         state.user = null;
+        state.isLoading = false;
+        state.error = action.payload;
       });
     builder
       .addCase(getSelf.pending, (state) => {
