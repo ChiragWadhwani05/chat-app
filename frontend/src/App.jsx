@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { getSelf } from './redux-slices/auth';
 import ProtectRoute from './components/Protectroute';
 import { useEffect } from 'react';
-import { lightTheme } from './constants/themes';
+import { lightTheme as theme } from './constants/themes';
 import NotFoundPage from './components/NotFound';
 import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
@@ -20,9 +20,12 @@ function App() {
   }, [dispatch]);
 
   return isLoading ? (
-    <Loader />
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Loader />
+    </ThemeProvider>
   ) : (
-    <ThemeProvider theme={lightTheme}>
+    <ThemeProvider theme={theme}>
       <CssBaseline />
       <BrowserRouter>
         <Routes>

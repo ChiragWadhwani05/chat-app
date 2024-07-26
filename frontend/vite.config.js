@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/v1': {
-        target: 'https://chat-app-production-4500.up.railway.app/api',
+        target: 'http://localhost:1212/api',
         changeOrigin: true,
       },
     },

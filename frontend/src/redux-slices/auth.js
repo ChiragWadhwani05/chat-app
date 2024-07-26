@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const API_URL = 'https://chat-app-production-4500.up.railway.app/api/v1/user';
+// const API_URL = 'https://chat-app-production-4500.up.railway.app/api/v1/user';
+const API_URL = 'http://localhost:1212/api/v1/user';
 axios.defaults.withCredentials = true;
 
 const initialState = {
@@ -39,11 +40,15 @@ export const loginUser = createAsyncThunk(
 );
 
 export const getSelf = createAsyncThunk('getSelf', async () => {
-  const response = await axios.get(`${API_URL}`, {
-    headers: { 'Content-Type': 'application/json' },
-  });
-  console.log(response.data);
-  return response.data.data;
+  try {
+    const response = await axios.get(`${API_URL}`, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+    console.log(response.data);
+    return response.data.data;
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 export const logoutUser = createAsyncThunk('logoutUser', async () => {

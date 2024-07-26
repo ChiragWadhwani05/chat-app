@@ -1,4 +1,4 @@
-import { indigo as color } from '@mui/material/colors';
+import { blue as color } from '@mui/material/colors';
 import { createTheme } from '@mui/material';
 const lightTheme = createTheme({
   palette: {
@@ -47,7 +47,7 @@ const darkTheme = createTheme({
     mode: 'dark',
     primary: color,
     secondary: {
-      main: '#8687E780',
+      main: '#757575',
       contrastText: '#ffffff',
     },
     text: {
