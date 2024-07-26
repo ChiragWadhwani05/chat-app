@@ -80,45 +80,62 @@ const getAllChats = asyncHandler(async (req: any, res: any) => {
 	const chats = await Chat.find({
 		participants: { $in: [userId] },
 	})
-		.populate(
-			"participants",
-			"-password -refreshToken -email -createdAt -updatedAt"
-		)
+		.populate("participants", "-password -refreshToken -email -createdAt")
 		.sort({ updatedAt: -1 });
 
-	const otherParticipant = (participants: any) => {
-		participants = participants.filter(
-			(participant: any) => participant._id != userId
-		);
+	const finalChats = await Promise.all(
+		chats.map(async (chat) => {
+			const otherParticipants = (participants: any) => {
+				return participants.filter((participant: any) => participant._id != userId);
+			};
 
-		if (participants[0].fullname) {
-			return participants[0].fullname;
-		}
-		return participants[0];
-	};
-	const finalChats = chats.map((chat) => {
-		const otherParticipants = (participants: any) => {
-			participants = participants.filter(
-				(participant: any) => participant._id != userId
-			);
-			return participants;
-		};
+			const calcTimeStamp = (timestamp: any) => {
+				const date = new Date(timestamp);
+				const now = new Date();
 
-		return {
-			_id: chat._id,
-			isGroupChat: chat.isGroupChat,
-			name: chat.isGroupChat
-				? chat.name
-				: otherParticipants(chat.participants)[0].fullname,
-			avatar: chat.isGroupChat
-				? chat.avatar
+				const isToday = date.toDateString() === now.toDateString();
+
+				if (isToday) {
+					return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+				} else {
+					return date.toLocaleDateString([], { day: "numeric", month: "long" });
+				}
+			};
+
+			const getLastMessage = async (id: any) => {
+				const messages = await Message.find({ chat: id })
+					.sort({ createdAt: -1 })
+					.limit(1);
+				if (messages.length > 0) {
+					return {
+						content: messages[0].content,
+						timestamp: messages[0].updatedAt,
+					};
+				}
+				return { content: null, timestamp: chat.updatedAt };
+			};
+
+			const lastMessage = await getLastMessage(chat._id);
+			console.log(lastMessage.timestamp);
+
+			return {
+				_id: chat._id,
+				isGroupChat: chat.isGroupChat,
+				name: chat.isGroupChat
+					? chat.name
+					: otherParticipants(chat.participants)[0].username,
+				avatar: chat.isGroupChat
 					? chat.avatar
-					: chat.participants
-							.slice(0, 3)
-							.map((participant: any) => participant.avatar)
-				: otherParticipants(chat.participants)[0].avatar,
-		};
-	});
+						? chat.avatar
+						: chat.participants
+								.slice(0, 3)
+								.map((participant: any) => participant.avatar)
+					: otherParticipants(chat.participants)[0].avatar,
+				lastMessage: lastMessage.content,
+				timeStamp: calcTimeStamp(lastMessage.timestamp),
+			};
+		})
+	);
 
 	return res
 		.status(200)
